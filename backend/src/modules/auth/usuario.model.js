@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
 const usuarioSchema = new mongoose.Schema({
+  nombre: {
+    type: String,
+    trim: true,
+    default: null
+  },
   email: {
     type: String,
     required: [true, 'El correo electrónico es requerido'],
@@ -19,6 +24,10 @@ const usuarioSchema = new mongoose.Schema({
     type: String,
     enum: ['admin', 'user'],
     default: 'user'
+  },
+  activo: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true // Crea automáticamente createdAt y updatedAt

@@ -12,7 +12,7 @@ const signToken = (usuario) => {
   );
 };
 
-export const registerUser = async ({ email, password, rol = 'user' }) => {
+export const registerUser = async ({ email, password, rol = 'user', nombre = null }) => {
   if (!email || !password) {
     throw new AppError('El email y la contraseña son obligatorios', 400, 'DATOS_INCOMPLETOS');
   }
@@ -27,13 +27,16 @@ export const registerUser = async ({ email, password, rol = 'user' }) => {
   const usuario = await Usuario.create({
     email: emailNormalizado,
     password,
-    rol
+    rol,
+    nombre: nombre ? String(nombre).trim() : null
   });
 
   return {
     id: usuario._id.toString(),
     email: usuario.email,
-    rol: usuario.rol
+    rol: usuario.rol,
+    nombre: usuario.nombre,
+    activo: usuario.activo
   };
 };
 
@@ -47,6 +50,10 @@ export const loginUser = async ({ email, password }) => {
   const usuario = await Usuario.findOne({ email: emailNormalizado }).select('+password');
   if (!usuario) {
     throw new AppError('Credenciales inválidas', 401, 'CREDENCIALES_INVALIDAS');
+  }
+
+  if (usuario.activo === false) {
+    throw new AppError('Usuario inactivo', 401, 'USUARIO_INACTIVO');
   }
 
   const passwordValida = await bcrypt.compare(String(password), usuario.password);

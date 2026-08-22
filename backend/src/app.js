@@ -7,6 +7,7 @@ import { swaggerSpec } from './docs/swagger.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import AppError from './errors/AppError.js';
 import authRoutes from './modules/auth/auth.routes.js';
+import usuarioRoutes from './modules/auth/usuario.routes.js';
 import categoriaRoutes from './modules/categorias/categoria.routes.js';
 import importRoutes from './modules/imports/import.routes.js';
 import productoRoutes from './modules/productos/producto.routes.js';
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/imports', importRoutes);
 app.use('/api/productos', productoRoutes);
