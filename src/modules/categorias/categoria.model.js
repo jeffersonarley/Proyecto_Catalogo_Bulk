@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const categoriaSchema = new mongoose.Schema({
   slug: {
@@ -36,4 +36,4 @@ const categoriaSchema = new mongoose.Schema({
 
 const Categoria = mongoose.model('Categoria', categoriaSchema, 'categorias');
 
-module.exports = Categoria;
+export default Categoria;

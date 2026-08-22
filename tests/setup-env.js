@@ -1,0 +1,10 @@
+process.env.PORT = '3000';
+process.env.MONGO_URI = 'mongodb://127.0.0.1:27017/catalogo_bulk_test';
+process.env.REDIS_HOST = '127.0.0.1';
+process.env.REDIS_PORT = '6379';
+process.env.JWT_SECRET = 'test-secret';
+process.env.JWT_EXPIRES_IN = '1h';
+process.env.MAX_FILE_SIZE_MB = '5';
+process.env.BATCH_SIZE = '100';
+process.env.CACHE_TTL_SECONDS = '60';
+process.env.IMPORT_ERRORS_CAP = '100';

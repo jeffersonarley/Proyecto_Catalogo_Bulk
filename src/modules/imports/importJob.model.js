@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 // Subesquema para registrar el detalle de las filas con error
 const errorDetalleSchema = new mongoose.Schema({
@@ -102,4 +102,4 @@ const importJobSchema = new mongoose.Schema({
 
 const ImportJob = mongoose.model('ImportJob', importJobSchema, 'import_jobs');
 
-module.exports = ImportJob;
+export default ImportJob;

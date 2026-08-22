@@ -20,8 +20,10 @@ services:
 
   mongo:
     image: mongo:7
+    # Mapeo modificado para evitar conflictos si hay un Mongo local en el host
+    # Exponer en el host 27018 pero el contenedor sigue usando 27017 internamente
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongo_data:/data/db
 

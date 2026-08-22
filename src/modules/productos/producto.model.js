@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const productoSchema = new mongoose.Schema({
   sku: {
@@ -71,11 +71,10 @@ const productoSchema = new mongoose.Schema({
 });
 
 // Middleware para asegurar que 'disponible' se mantenga actualizado con el stock
-productoSchema.pre('save', function(next) {
+productoSchema.pre('save', async function() {
   this.disponible = this.stock > 0;
-  next();
 });
 
 const Producto = mongoose.model('Producto', productoSchema, 'productos');
 
-module.exports = Producto;
+export default Producto;
