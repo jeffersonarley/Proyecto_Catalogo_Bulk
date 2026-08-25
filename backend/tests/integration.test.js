@@ -122,9 +122,14 @@ describe('Roles y autorización', () => {
     expect(res.status).toBe(403);
   });
 
-  test('ruta sin token devuelve 401', async () => {
-    const res = await request(app).get('/api/productos');
+  test('ruta protegida sin token devuelve 401', async () => {
+    const res = await request(app).post('/api/productos');
     expect(res.status).toBe(401);
+  });
+
+  test('GET /api/productos es público (200 sin token)', async () => {
+    const res = await request(app).get('/api/productos');
+    expect(res.status).toBe(200);
   });
 
   test('admin puede crear proveedor', async () => {

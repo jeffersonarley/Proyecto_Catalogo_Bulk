@@ -3,61 +3,65 @@ import { Notify } from "quasar";
 
 import { useAuthStore } from "@/store/Auth";
 
-import AdminLayout from "@/layouts/AdminLayout.vue";
+import Layout from "@/pages/Layout/Layout.vue";
 
-import LoginView from "@/views/LoginView.vue";
-import CatalogoView from "@/views/CatalogoView.vue";
-import ProductosView from "@/views/ProductosView.vue";
-import ProveedoresView from "@/views/ProveedoresView.vue";
-import CategoriasView from "@/views/CategoriasView.vue";
-import UsuariosView from "@/views/UsuariosView.vue";
-import NotFoundView from "@/views/NotFoundView.vue";
+import Login from "@/pages/Login/Login.vue";
+import Catalogo from "@/pages/Catalogo/Catalogo.vue";
+import Productos from "@/pages/Layout/Productos/Productos.vue";
+import Proveedores from "@/pages/Layout/Proveedores/Proveedores.vue";
+import Categorias from "@/pages/Layout/Categorias/Categorias.vue";
+import Usuarios from "@/pages/Layout/Usuarios/Usuarios.vue";
+import NotFound from "@/pages/NotFound/NotFound.vue";
 
 const routes = [
   {
     path: "/",
+    redirect: { name: "login" },
+  },
+  {
+    path: "/login",
     name: "login",
-    component: LoginView,
+    component: Login,
     meta: { titulo: "Iniciar sesión", soloInvitados: true },
   },
   {
     path: "/",
-    component: AdminLayout,
+    component: Layout,
     children: [
       {
         path: "catalogo",
         name: "catalogo",
-        component: CatalogoView,
+        component: Catalogo,
         meta: { titulo: "Catálogo", requiereAuth: true },
       },
       {
         path: "productos",
         name: "productos",
-        component: ProductosView,
+        component: Productos,
         meta: { titulo: "Productos", requiereAuth: true, requiereAdmin: true },
       },
       {
         path: "proveedores",
         name: "proveedores",
-        component: ProveedoresView,
+        component: Proveedores,
         meta: { titulo: "Proveedores", requiereAuth: true, requiereAdmin: true },
       },
       {
         path: "categorias",
         name: "categorias",
-        component: CategoriasView,
+        component: Categorias,
         meta: { titulo: "Categorías", requiereAuth: true, requiereAdmin: true },
       },
       {
         path: "usuarios",
         name: "usuarios",
-        component: UsuariosView,
+        component: Usuarios,
         meta: { titulo: "Usuarios", requiereAuth: true, requiereAdmin: true },
       },
       {
         path: ":pathMatch(.*)*",
         name: "no-encontrado",
-        component: NotFoundView,
+        component: NotFound,
         meta: { titulo: "Página no encontrada" },
       },
     ],

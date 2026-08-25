@@ -12,9 +12,9 @@ import { rol } from '../../middlewares/rol.js';
 
 const router = Router();
 
-router.get('/', auth, getProductosController);
-router.get('/stats', auth, getProductoStatsController);
-router.get('/:id', auth, getProductoController);
+router.get('/', getProductosController);
+router.get('/stats', getProductoStatsController);
+router.get('/:id', getProductoController);
 
 // Solo admin
 router.post('/', auth, rol('admin'), createProductoController);

@@ -10,9 +10,9 @@ import { rol } from '../../middlewares/rol.js';
 const router = Router();
 
 // Lista todas las categorías (sin paginar según especificación)
-router.get('/', auth, getCategoriasController);
+router.get('/', getCategoriasController);
 // Obtener por slug (contrato)
-router.get('/:slug', auth, getCategoriaController);
+router.get('/:slug', getCategoriaController);
 // Enriquecer categoría (solo admin); el slug no se edita
 router.put('/:id', auth, rol('admin'), updateCategoriaController);
 

@@ -11,8 +11,8 @@ import { rol } from '../../middlewares/rol.js';
 
 const router = Router();
 
-router.get('/', auth, getProveedoresController);
-router.get('/:id', auth, getProveedorController);
+router.get('/', getProveedoresController);
+router.get('/:id', getProveedorController);
 // Admin routes
 router.post('/', auth, rol('admin'), createProveedorController);
 router.put('/:id', auth, rol('admin'), updateProveedorController);
