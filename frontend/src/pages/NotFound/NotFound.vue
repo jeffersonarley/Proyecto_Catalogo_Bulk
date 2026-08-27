@@ -12,7 +12,7 @@
           no-caps
           color="primary"
           label="Ir al catálogo"
-          :to="{ name: 'catalogo' }"
+          :to="{ name: 'inicio' }"
         />
       </div>
     </div>

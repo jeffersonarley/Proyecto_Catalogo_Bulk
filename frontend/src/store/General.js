@@ -8,7 +8,7 @@ export const useGeneralStore = defineStore("general", () => {
 
   const ultimaSincronizacion = ref(null);
 
-  const urlApi = computed(() => import.meta.env.VITE_API_URL);
+  const urlApi = computed(() => import.meta.env.VITE_API_URL || "http://localhost:3000/api");
 
   function alternarMenu() {
     menuAbierto.value = !menuAbierto.value;
