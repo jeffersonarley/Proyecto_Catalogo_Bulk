@@ -129,7 +129,7 @@ const salir = () => {
 }
 
 .barra-promo {
-  background-color: #fb7701;
+  background-color: #2e7d32;
   color: #fff;
   font-size: 12px;
   font-weight: 600;

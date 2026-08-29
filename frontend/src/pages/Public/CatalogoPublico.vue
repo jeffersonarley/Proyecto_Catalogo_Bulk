@@ -218,8 +218,8 @@ onMounted(() => {
   flex-shrink: 0;
 
   &--activo {
-    background: #fb7701;
-    border-color: #fb7701;
+    background: #2e7d32;
+    border-color: #2e7d32;
     color: #fff;
   }
 }
@@ -292,6 +292,6 @@ onMounted(() => {
 .producto-precio {
   font-size: 18px;
   font-weight: 800;
-  color: #fb7701;
+  color: #2e7d32;
 }
 </style>
