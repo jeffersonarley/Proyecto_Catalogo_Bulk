@@ -314,4 +314,34 @@ describe('Productos', () => {
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(404);
   });
+
+  test('buscar por nombre (q) → solo coincidencias', async () => {
+    await request(app)
+      .post('/api/productos')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        sku: 'SKU-QTEST',
+        nombre: 'Zapato Busqueda Unica',
+        precio: 10,
+        stock: 1,
+        categoria: 'ropa',
+        proveedorId
+      });
+
+    const res = await request(app)
+      .get('/api/productos?q=busqueda%20unica')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.total).toBe(1);
+    expect(res.body.data[0].nombre).toBe('Zapato Busqueda Unica');
+  });
+
+  test('ordenar por precio ascendente', async () => {
+    const res = await request(app)
+      .get('/api/productos?sort=precio_asc&limit=100')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    const precios = res.body.data.map((p) => p.precio);
+    expect(precios).toEqual([...precios].sort((a, b) => a - b));
+  });
 });

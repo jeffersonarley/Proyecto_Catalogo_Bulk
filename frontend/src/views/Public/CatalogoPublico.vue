@@ -1,6 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 
 import { get } from "@/services/api.service";
 import { useGeneralStore } from "@/store/General";
@@ -8,7 +7,6 @@ import { useNotificar } from "@/composables/useNotificar";
 import { formatPrecio } from "@/utils/formatDate";
 
 const general = useGeneralStore();
-const route = useRoute();
 const { notificarError } = useNotificar();
 
 const productos = ref([]);
@@ -18,23 +16,33 @@ const limit = 24;
 const cargando = ref(false);
 
 const categorias = ref([]);
-const categoriaActiva = ref("");
-const busqueda = ref("");
+
+const filtros = reactive({
+  busqueda: "",
+  categoria: "",
+  orden: "recientes",
+});
+
+const opcionesOrden = [
+  { label: "Relevancia", value: "recientes" },
+  { label: "Precio: menor a mayor", value: "precio_asc" },
+  { label: "Precio: mayor a menor", value: "precio_desc" },
+  { label: "Alfabético (A-Z)", value: "nombre_asc" },
+];
 
 const totalPaginas = computed(() => Math.ceil(total.value / limit) || 1);
+
+const hayFiltros = computed(
+  () =>
+    filtros.busqueda.trim() !== "" ||
+    filtros.categoria !== "" ||
+    filtros.orden !== "recientes"
+);
 
 const chipsCategoria = computed(() => [
   { label: "Todo", value: "" },
   ...categorias.value.map((c) => ({ label: c.nombre || c.slug, value: c.slug })),
 ]);
-
-const productosFiltrados = computed(() => {
-  const q = busqueda.value.toLowerCase();
-  if (!q) return productos.value;
-  return productos.value.filter((p) =>
-    (p.nombre || "").toLowerCase().includes(q)
-  );
-});
 
 async function cargarCategorias() {
   try {
@@ -52,7 +60,11 @@ async function cargarProductos() {
     params.set("page", String(page.value));
     params.set("limit", String(limit));
     params.set("activo", "true");
-    if (categoriaActiva.value) params.set("categoria", categoriaActiva.value);
+
+    const busqueda = filtros.busqueda.trim();
+    if (busqueda) params.set("q", busqueda);
+    if (filtros.categoria) params.set("categoria", filtros.categoria);
+    if (filtros.orden) params.set("sort", filtros.orden);
 
     const res = await get(`/productos?${params.toString()}`);
     productos.value = res.data || [];
@@ -65,37 +77,86 @@ async function cargarProductos() {
   }
 }
 
-function seleccionarCategoria(slug) {
-  categoriaActiva.value = slug;
-  page.value = 1;
-  cargarProductos();
-}
-
 function cambiarPagina(p) {
   page.value = p;
   cargarProductos();
 }
 
-// La búsqueda llega desde el header vía query ?q=
-watch(
-  () => route.query.q,
-  (q) => {
-    busqueda.value = String(q || "").trim();
+function limpiarFiltros() {
+  filtros.busqueda = "";
+  filtros.categoria = "";
+  filtros.orden = "recientes";
+}
+
+// Debounce: recarga cuando cambia cualquier filtro (búsqueda, categoría u orden).
+let temporizador = null;
+watch(filtros, () => {
+  clearTimeout(temporizador);
+  temporizador = setTimeout(() => {
     page.value = 1;
     cargarProductos();
-  }
-);
+  }, 300);
+});
 
 onMounted(() => {
-  busqueda.value = String(route.query.q || "").trim();
   cargarCategorias();
   cargarProductos();
 });
+
+onBeforeUnmount(() => clearTimeout(temporizador));
 </script>
 
 <template>
   <q-page class="bg-grey-1">
     <div class="contenedor-catalogo">
+      <!-- Barra de filtros -->
+      <div class="barra-filtros row items-center q-col-gutter-sm q-mb-md">
+        <div class="col-12 col-sm-6 col-md-5">
+          <q-input
+            v-model="filtros.busqueda"
+            outlined
+            dense
+            rounded
+            clearable
+            class="buscador"
+            placeholder="Buscar por nombre..."
+          >
+            <template #prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </div>
+
+        <div class="col-12 col-sm-4 col-md-4">
+          <q-select
+            v-model="filtros.orden"
+            outlined
+            dense
+            emit-value
+            map-options
+            :options="opcionesOrden"
+            label="Ordenar por"
+          >
+            <template #prepend>
+              <q-icon name="sort" />
+            </template>
+          </q-select>
+        </div>
+
+        <div class="col-12 col-sm-auto col-md-3">
+          <q-btn
+            flat
+            no-caps
+            color="grey-8"
+            icon="filter_alt_off"
+            label="Limpiar filtros"
+            :disable="!hayFiltros"
+            class="full-width"
+            @click="limpiarFiltros"
+          />
+        </div>
+      </div>
+
       <!-- Chips de categoría -->
       <div class="chips-categoria q-mb-md">
         <q-chip
@@ -103,11 +164,17 @@ onMounted(() => {
           :key="c.value"
           clickable
           class="chip-cat"
-          :class="{ 'chip-cat--activo': categoriaActiva === c.value }"
-          @click="seleccionarCategoria(c.value)"
+          :class="{ 'chip-cat--activo': filtros.categoria === c.value }"
+          @click="filtros.categoria = c.value"
         >
           {{ c.label }}
         </q-chip>
+      </div>
+
+      <!-- Contador de resultados -->
+      <div v-if="!cargando" class="contador texto-suave q-mb-sm">
+        <q-icon name="inventory_2" size="16px" class="q-mr-xs" />
+        {{ total }} {{ total === 1 ? "resultado" : "resultados" }}
       </div>
 
       <!-- Estado: cargando -->
@@ -115,16 +182,26 @@ onMounted(() => {
         <q-spinner-dots color="orange-8" size="40px" />
       </div>
 
-      <!-- Estado: vacío -->
-      <div v-else-if="productosFiltrados.length === 0" class="column items-center q-py-xl">
-        <q-icon name="inbox" size="72px" color="grey-4" class="q-mb-sm" />
-        <span class="empty-title">No hay productos disponibles</span>
+      <!-- Estado: sin resultados -->
+      <div v-else-if="productos.length === 0" class="column items-center q-py-xl">
+        <q-icon name="search_off" size="72px" color="grey-4" class="q-mb-sm" />
+        <span class="empty-title">No se encontraron productos con estos filtros</span>
+        <p class="texto-suave q-mb-md">Prueba con otra búsqueda o categoría.</p>
+        <q-btn
+          v-if="hayFiltros"
+          unelevated
+          no-caps
+          color="primary"
+          icon="filter_alt_off"
+          label="Limpiar filtros"
+          @click="limpiarFiltros"
+        />
       </div>
 
       <!-- Grid de productos -->
       <div v-else class="row q-col-gutter-md">
         <div
-          v-for="p in productosFiltrados"
+          v-for="p in productos"
           :key="p._id"
           class="col-6 col-sm-4 col-md-3"
         >
@@ -197,6 +274,19 @@ onMounted(() => {
   max-width: 1180px;
   margin: 0 auto;
   padding: 16px 16px 40px;
+}
+
+.buscador {
+  :deep(.q-field__control) {
+    background: #fff;
+    border-radius: 24px;
+  }
+}
+
+.contador {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
 }
 
 .chips-categoria {

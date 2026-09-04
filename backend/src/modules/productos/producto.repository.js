@@ -11,10 +11,10 @@ export const productoRepository = {
 
   porSku: (sku) => Producto.findOne({ sku }).lean(),
 
-  listar: async (filtros = {}, { page = 1, limit = 20 } = {}) => {
+  listar: async (filtros = {}, { page = 1, limit = 20, sort = { createdAt: -1 } } = {}) => {
     const [items, total] = await Promise.all([
       Producto.find(filtros)
-        .sort({ createdAt: -1 })
+        .sort(sort)
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),

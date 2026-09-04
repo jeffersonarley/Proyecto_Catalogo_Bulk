@@ -5,6 +5,15 @@ import AppError from '../../errors/AppError.js';
 
 const normalizarSku = (sku) => String(sku).trim().toUpperCase();
 
+const escapeRegex = (valor) => String(valor).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const ORDENES = {
+  precio_asc: { precio: 1, _id: 1 },
+  precio_desc: { precio: -1, _id: 1 },
+  nombre_asc: { nombre: 1, _id: 1 },
+  recientes: { createdAt: -1, _id: 1 }
+};
+
 export const createProducto = async (data = {}) => {
   if (!data.proveedorId) {
     throw new AppError('El proveedorId es obligatorio', 400, 'VALIDACION_FALLIDA');
@@ -64,6 +73,10 @@ export const listProductos = async (query = {}) => {
     filtros.activo = query.activo === 'true' || query.activo === true;
   }
 
+  if (query.q) {
+    filtros.nombre = { $regex: escapeRegex(String(query.q).trim()), $options: 'i' };
+  }
+
   if (query.proveedor) {
     const proveedor = await resolverProveedor(query.proveedor);
     if (!proveedor) {
@@ -72,7 +85,9 @@ export const listProductos = async (query = {}) => {
     filtros.proveedorId = proveedor._id;
   }
 
-  const { items, total } = await productoRepository.listar(filtros, { page, limit });
+  const sort = ORDENES[query.sort] || ORDENES.recientes;
+
+  const { items, total } = await productoRepository.listar(filtros, { page, limit, sort });
 
   return {
     data: items,

@@ -148,10 +148,12 @@ const swaggerSpec = {
         parameters: [
           { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
           { name: 'limit', in: 'query', schema: { type: 'integer', default: 20, maximum: 100 } },
+          { name: 'q', in: 'query', description: 'Búsqueda por nombre (insensible a mayúsculas)', schema: { type: 'string' } },
           { name: 'categoria', in: 'query', schema: { type: 'string' } },
           { name: 'proveedor', in: 'query', description: 'slug o id', schema: { type: 'string' } },
           { name: 'disponible', in: 'query', schema: { type: 'boolean' } },
-          { name: 'activo', in: 'query', schema: { type: 'boolean' } }
+          { name: 'activo', in: 'query', schema: { type: 'boolean' } },
+          { name: 'sort', in: 'query', description: 'Orden: recientes, precio_asc, precio_desc, nombre_asc', schema: { type: 'string' } }
         ],
         responses: {
           200: { description: 'Lista paginada' },
