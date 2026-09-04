@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from "vue";
 
 import EncabezadoPagina from "@/components/Encabezados/EncabezadoPagina.vue";
 import TablaDatos from "@/components/Tables/TablaDatos.vue";
-import { get, post, put, del } from "@/services/api.service";
+import { get, post, put, patch } from "@/services/api.service";
 import { useGeneralStore } from "@/store/General";
 import { useNotificar } from "@/composables/useNotificar";
 import { useConfirmar } from "@/composables/useConfirmar";
@@ -33,6 +33,7 @@ const columnas = [
   { name: "stock", label: "Stock", field: "stock", align: "right", sortable: true },
   { name: "categoria", label: "Categoría", field: "categoria", align: "left", sortable: true },
   { name: "disponible", label: "Disponible", field: "disponible", align: "center" },
+  { name: "activo", label: "Estado", field: "activo", align: "center" },
   { name: "acciones", label: "Acciones", field: "acciones", align: "right" },
 ];
 
@@ -158,18 +159,19 @@ const guardar = async () => {
   }
 };
 
-const eliminar = async (p) => {
+const cambiarEstado = async (p) => {
+  const activo = p.activo;
   const aceptado = await confirmar({
-    titulo: "Eliminar producto",
-    mensaje: `¿Confirmas eliminar el producto ${p.sku}?`,
-    textoOk: "Eliminar",
-    color: "negative",
+    titulo: activo ? "Desactivar producto" : "Activar producto",
+    mensaje: `¿Confirmas ${activo ? "desactivar" : "activar"} el producto ${p.sku}?`,
+    textoOk: activo ? "Desactivar" : "Activar",
+    color: activo ? "negative" : "primary",
   });
   if (!aceptado) return;
 
   try {
-    await del(`/productos/${p._id}`);
-    notificarOk("Producto eliminado");
+    await patch(`/productos/${p._id}/estado`, { activo: !activo });
+    notificarOk(activo ? "Producto desactivado" : "Producto activado");
     await cargar();
   } catch (e) {
     notificarError(e);
@@ -222,6 +224,15 @@ const eliminar = async (p) => {
           </q-td>
         </template>
 
+        <template #body-cell-activo="celda">
+          <q-td :props="celda" class="text-center">
+            <q-badge
+              :color="celda.row.activo ? 'positive' : 'grey-6'"
+              :label="celda.row.activo ? 'Activo' : 'Inactivo'"
+            />
+          </q-td>
+        </template>
+
         <template #body-cell-acciones="celda">
           <q-td :props="celda" class="text-right">
             <q-btn
@@ -242,12 +253,12 @@ const eliminar = async (p) => {
               dense
               round
               size="sm"
-              icon="delete"
-              color="negative"
               class="action-secondary"
-              @click="eliminar(celda.row)"
+              :icon="celda.row.activo ? 'toggle_on' : 'toggle_off'"
+              :color="celda.row.activo ? 'negative' : 'positive'"
+              @click="cambiarEstado(celda.row)"
             >
-              <q-tooltip>Eliminar</q-tooltip>
+              <q-tooltip>{{ celda.row.activo ? "Desactivar" : "Activar" }}</q-tooltip>
             </q-btn>
           </q-td>
         </template>

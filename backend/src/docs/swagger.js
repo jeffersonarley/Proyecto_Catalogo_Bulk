@@ -150,7 +150,8 @@ const swaggerSpec = {
           { name: 'limit', in: 'query', schema: { type: 'integer', default: 20, maximum: 100 } },
           { name: 'categoria', in: 'query', schema: { type: 'string' } },
           { name: 'proveedor', in: 'query', description: 'slug o id', schema: { type: 'string' } },
-          { name: 'disponible', in: 'query', schema: { type: 'boolean' } }
+          { name: 'disponible', in: 'query', schema: { type: 'boolean' } },
+          { name: 'activo', in: 'query', schema: { type: 'boolean' } }
         ],
         responses: {
           200: { description: 'Lista paginada' },
@@ -220,12 +221,24 @@ const swaggerSpec = {
           409: { description: 'sku duplicado' }
         }
       },
-      delete: {
+      patch: {
         tags: ['Productos'],
-        summary: 'Eliminar producto (solo admin)',
+        summary: 'Activar/desactivar producto (soft delete, solo admin)',
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['activo'],
+                properties: { activo: { type: 'boolean' } }
+              }
+            }
+          }
+        },
         responses: {
-          204: { description: 'Eliminado' },
+          200: { description: 'Estado actualizado' },
           403: { description: 'Rol insuficiente' },
           404: { description: 'No existe' }
         }
@@ -292,15 +305,26 @@ const swaggerSpec = {
           404: { description: 'No existe' }
         }
       },
-      delete: {
+      patch: {
         tags: ['Proveedores'],
-        summary: 'Eliminar proveedor (solo admin)',
+        summary: 'Activar/desactivar proveedor (soft delete, solo admin)',
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['activo'],
+                properties: { activo: { type: 'boolean' } }
+              }
+            }
+          }
+        },
         responses: {
-          204: { description: 'Eliminado' },
+          200: { description: 'Estado actualizado' },
           403: { description: 'Rol insuficiente' },
-          404: { description: 'No existe' },
-          409: { description: 'Tiene productos asociados' }
+          404: { description: 'No existe' }
         }
       }
     },

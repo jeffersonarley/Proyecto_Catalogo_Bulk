@@ -46,26 +46,7 @@ export const updateUsuario = async (id, data = {}) => {
   return aPublico(usuario);
 };
 
-export const deleteUsuario = async (id, usuarioActualId) => {
-  if (!mongoose.isValidObjectId(id)) {
-    throw new AppError('Identificador inválido', 400, 'ID_INVALIDO');
-  }
-
-  const usuario = await Usuario.findById(id);
-  if (!usuario) {
-    throw new AppError('Usuario no encontrado', 404, 'USUARIO_NO_ENCONTRADO');
-  }
-
-  if (usuarioActualId && usuario._id.toString() === String(usuarioActualId)) {
-    throw new AppError('No puedes eliminar tu propia cuenta', 409, 'ACCION_NO_PERMITIDA');
-  }
-
-  await usuario.deleteOne();
-  return null;
-};
-
 export default {
   listUsuarios,
-  updateUsuario,
-  deleteUsuario
+  updateUsuario
 };

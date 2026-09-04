@@ -3,27 +3,25 @@ import { computed, onMounted, ref } from "vue";
 
 import EncabezadoPagina from "@/components/Encabezados/EncabezadoPagina.vue";
 import TablaDatos from "@/components/Tables/TablaDatos.vue";
-import { get, post, put, del } from "@/services/api.service";
+import { get, post, put, patch } from "@/services/api.service";
 import { useGeneralStore } from "@/store/General";
 import { useNotificar } from "@/composables/useNotificar";
 import { useConfirmar } from "@/composables/useConfirmar";
-import { formatDate } from "@/utils/formatDate";
-import { requerido, esEmail, minimo, seleccionRequerida } from "@/utils/reglas";
+import { requerido, esEmail } from "@/utils/reglas";
 
 const general = useGeneralStore();
 const { notificarOk, notificarError } = useNotificar();
 const { confirmar } = useConfirmar();
 
 const columnas = [
-  { name: "nombre", label: "Nombre", field: "nombre", align: "left" },
-  { name: "email", label: "Email", field: "email", align: "left", sortable: true },
-  { name: "rol", label: "Rol", field: "rol", align: "center" },
+  { name: "nombre", label: "Nombre", field: "nombre", align: "left", sortable: true },
+  { name: "slug", label: "Slug", field: "slug", align: "left", sortable: true },
+  { name: "contactoEmail", label: "Contacto", field: "contactoEmail", align: "left" },
   { name: "activo", label: "Activo", field: "activo", align: "center" },
-  { name: "createdAt", label: "Creado", field: "createdAt", align: "left", format: (v) => formatDate(v) },
   { name: "acciones", label: "Acciones", field: "acciones", align: "right" },
 ];
 
-const usuarios = ref([]);
+const proveedores = ref([]);
 const cargando = ref(false);
 const error = ref(null);
 
@@ -31,8 +29,8 @@ async function cargar() {
   cargando.value = true;
   error.value = null;
   try {
-    const res = await get("/usuarios");
-    usuarios.value = res.data || [];
+    const res = await get("/proveedores?page=1&limit=100");
+    proveedores.value = res.data || [];
     general.marcarSincronizacion();
   } catch (e) {
     error.value = e.mensaje;
@@ -46,69 +44,51 @@ onMounted(cargar);
 
 const dialogo = ref(false);
 const guardando = ref(false);
-const usuarioEditando = ref(null);
+const proveedorEditando = ref(null);
 const formularioRef = ref(null);
-const verPassword = ref(false);
 
-const formulario = ref({
-  nombre: "",
-  email: "",
-  password: "",
-  rol: "user",
-  activo: true,
-});
+const formulario = ref({ nombre: "", slug: "", contactoEmail: "", logoUrl: "" });
 
-const esEdicion = computed(() => usuarioEditando.value !== null);
+const esEdicion = computed(() => proveedorEditando.value !== null);
 
-const opcionesRol = [
-  { label: "user", value: "user" },
-  { label: "admin", value: "admin" },
-];
-
-const formularioVacio = () => ({
-  nombre: "",
-  email: "",
-  password: "",
-  rol: "user",
-  activo: true,
-});
+const formularioVacio = () => ({ nombre: "", slug: "", contactoEmail: "", logoUrl: "" });
 
 const abrirCreacion = () => {
-  usuarioEditando.value = null;
+  proveedorEditando.value = null;
   formulario.value = formularioVacio();
   dialogo.value = true;
 };
 
-const abrirEdicion = (u) => {
-  usuarioEditando.value = u;
+const abrirEdicion = (p) => {
+  proveedorEditando.value = p;
   formulario.value = {
-    nombre: u.nombre || "",
-    email: u.email,
-    password: "",
-    rol: u.rol,
-    activo: u.activo,
+    nombre: p.nombre,
+    slug: p.slug,
+    contactoEmail: p.contactoEmail || "",
+    logoUrl: p.logoUrl || "",
   };
   dialogo.value = true;
 };
 
+const construirDatos = () => ({
+  nombre: formulario.value.nombre.trim(),
+  slug: formulario.value.slug.trim(),
+  contactoEmail: formulario.value.contactoEmail
+    ? formulario.value.contactoEmail.trim()
+    : null,
+  logoUrl: formulario.value.logoUrl ? formulario.value.logoUrl.trim() : null,
+});
+
 const guardar = async () => {
   guardando.value = true;
   try {
+    const datos = construirDatos();
     if (esEdicion.value) {
-      await put(`/usuarios/${usuarioEditando.value.id}`, {
-        nombre: formulario.value.nombre.trim() || null,
-        rol: formulario.value.rol,
-        activo: formulario.value.activo,
-      });
-      notificarOk("Usuario actualizado");
+      await put(`/proveedores/${proveedorEditando.value._id}`, datos);
+      notificarOk("Proveedor actualizado");
     } else {
-      await post("/auth/register", {
-        nombre: formulario.value.nombre.trim() || null,
-        email: formulario.value.email.trim(),
-        password: formulario.value.password,
-        rol: formulario.value.rol,
-      });
-      notificarOk("Usuario creado");
+      await post("/proveedores", datos);
+      notificarOk("Proveedor creado");
     }
     dialogo.value = false;
     await cargar();
@@ -119,18 +99,19 @@ const guardar = async () => {
   }
 };
 
-const eliminar = async (u) => {
+const cambiarEstado = async (p) => {
+  const activo = p.activo;
   const aceptado = await confirmar({
-    titulo: "Eliminar usuario",
-    mensaje: `¿Confirmas eliminar el usuario ${u.email}?`,
-    textoOk: "Eliminar",
-    color: "negative",
+    titulo: activo ? "Desactivar proveedor" : "Activar proveedor",
+    mensaje: `¿Confirmas ${activo ? "desactivar" : "activar"} el proveedor ${p.nombre}?`,
+    textoOk: activo ? "Desactivar" : "Activar",
+    color: activo ? "negative" : "primary",
   });
   if (!aceptado) return;
 
   try {
-    await del(`/usuarios/${u.id}`);
-    notificarOk("Usuario eliminado");
+    await patch(`/proveedores/${p._id}/estado`, { activo: !activo });
+    notificarOk(activo ? "Proveedor desactivado" : "Proveedor activado");
     await cargar();
   } catch (e) {
     notificarError(e);
@@ -142,9 +123,9 @@ const eliminar = async (u) => {
   <q-page>
     <div class="contenedor-app">
       <EncabezadoPagina
-        titulo="Usuarios"
-        subtitulo="Cuentas que pueden entrar a la aplicación"
-        icono="group"
+        titulo="Proveedores"
+        subtitulo="Marcas y distribuidores que envían catálogos"
+        icono="local_shipping"
       >
         <template #acciones>
           <q-btn
@@ -152,7 +133,7 @@ const eliminar = async (u) => {
             no-caps
             color="primary"
             icon="add"
-            label="Nuevo usuario"
+            label="Nuevo proveedor"
             @click="abrirCreacion"
           />
         </template>
@@ -169,27 +150,11 @@ const eliminar = async (u) => {
       </q-banner>
 
       <TablaDatos
-        :filas="usuarios"
+        :filas="proveedores"
         :columnas="columnas"
         :cargando="cargando"
-        mensaje-vacio="No hay usuarios registrados"
+        mensaje-vacio="Aún no hay proveedores registrados"
       >
-        <template #body-cell-nombre="celda">
-          <q-td :props="celda">
-            {{ celda.row.nombre || "—" }}
-          </q-td>
-        </template>
-
-        <template #body-cell-rol="celda">
-          <q-td :props="celda" class="text-center">
-            <q-badge
-              :color="celda.row.rol === 'admin' ? 'warning' : 'blue-3'"
-              text-color="black"
-              :label="celda.row.rol"
-            />
-          </q-td>
-        </template>
-
         <template #body-cell-activo="celda">
           <q-td :props="celda" class="text-center">
             <q-badge
@@ -219,12 +184,12 @@ const eliminar = async (u) => {
               dense
               round
               size="sm"
-              icon="delete"
-              color="negative"
               class="action-secondary"
-              @click="eliminar(celda.row)"
+              :icon="celda.row.activo ? 'toggle_on' : 'toggle_off'"
+              :color="celda.row.activo ? 'negative' : 'positive'"
+              @click="cambiarEstado(celda.row)"
             >
-              <q-tooltip>Eliminar</q-tooltip>
+              <q-tooltip>{{ celda.row.activo ? "Desactivar" : "Activar" }}</q-tooltip>
             </q-btn>
           </q-td>
         </template>
@@ -236,8 +201,10 @@ const eliminar = async (u) => {
         <q-card-section class="bg-primary text-white row items-center no-wrap q-px-lg q-py-md">
           <q-icon :name="esEdicion ? 'edit' : 'add'" size="28px" class="q-mr-md" />
           <div>
-            <div class="dialog-title">{{ esEdicion ? "Editar usuario" : "Nuevo usuario" }}</div>
-            <div class="text-caption text-green-2">Datos de la cuenta</div>
+            <div class="dialog-title">
+              {{ esEdicion ? "Editar proveedor" : "Nuevo proveedor" }}
+            </div>
+            <div class="text-caption text-green-2">Datos del proveedor</div>
           </div>
           <q-space />
           <q-btn v-close-popup flat round dense icon="close" color="white" />
@@ -249,56 +216,37 @@ const eliminar = async (u) => {
               v-model="formulario.nombre"
               outlined
               dense
-              label="Nombre (opcional)"
+              label="Nombre *"
+              :rules="[requerido('El nombre')]"
+              lazy-rules
             />
 
             <q-input
-              v-model="formulario.email"
+              v-model="formulario.slug"
+              outlined
+              dense
+              label="Slug *"
+              hint="Minúsculas, números y guiones. Ej: acme-corp"
+              :rules="[requerido('El slug')]"
+              lazy-rules
+            />
+
+            <q-input
+              v-model="formulario.contactoEmail"
               outlined
               dense
               type="email"
-              label="Email *"
-              :disable="esEdicion"
-              :rules="[requerido('El email'), esEmail()]"
+              label="Email de contacto (opcional)"
+              :rules="[(v) => !v || esEmail()(v)]"
               lazy-rules
             />
 
             <q-input
-              v-if="!esEdicion"
-              v-model="formulario.password"
+              v-model="formulario.logoUrl"
               outlined
               dense
-              label="Contraseña *"
-              autocomplete="new-password"
-              :type="verPassword ? 'text' : 'password'"
-              :rules="[requerido('La contraseña'), minimo(6, 'La contraseña')]"
-              lazy-rules
-            >
-              <template #append>
-                <q-icon
-                  :name="verPassword ? 'visibility_off' : 'visibility'"
-                  class="cursor-pointer"
-                  @click="verPassword = !verPassword"
-                />
-              </template>
-            </q-input>
-
-            <q-select
-              v-model="formulario.rol"
-              outlined
-              dense
-              emit-value
-              map-options
-              :options="opcionesRol"
-              label="Rol *"
-              :rules="[seleccionRequerida('el rol')]"
-            />
-
-            <q-toggle
-              v-if="esEdicion"
-              v-model="formulario.activo"
-              label="Cuenta activa"
-              color="primary"
+              type="url"
+              label="URL del logo (opcional)"
             />
           </q-card-section>
 
@@ -310,7 +258,7 @@ const eliminar = async (u) => {
               type="submit"
               color="primary"
               class="btn-ok"
-              :label="esEdicion ? 'Guardar cambios' : 'Crear usuario'"
+              :label="esEdicion ? 'Guardar cambios' : 'Crear proveedor'"
               :loading="guardando"
             />
           </q-card-actions>

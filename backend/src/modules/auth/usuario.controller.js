@@ -1,4 +1,4 @@
-import { deleteUsuario, listUsuarios, updateUsuario } from './usuario.service.js';
+import { listUsuarios, updateUsuario } from './usuario.service.js';
 
 export const listUsuariosController = async (_req, res, next) => {
   try {
@@ -18,17 +18,7 @@ export const updateUsuarioController = async (req, res, next) => {
   }
 };
 
-export const deleteUsuarioController = async (req, res, next) => {
-  try {
-    await deleteUsuario(req.params.id, req.usuario?.id);
-    return res.status(204).send();
-  } catch (error) {
-    return next(error);
-  }
-};
-
 export default {
   listUsuariosController,
-  updateUsuarioController,
-  deleteUsuarioController
+  updateUsuarioController
 };

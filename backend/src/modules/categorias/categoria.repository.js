@@ -50,9 +50,7 @@ export const categoriaRepository = {
     return Categoria.find({ slug: { $in: [...slugs] } }).lean();
   },
 
-  guardar: (doc) => doc.save(),
-
-  eliminar: (doc) => doc.deleteOne()
+  guardar: (doc) => doc.save()
 };
 
 export default categoriaRepository;

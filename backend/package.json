@@ -7,6 +7,8 @@
   "scripts": {
     "start": "node src/server.js",
     "seed": "node src/scripts/seed-admin.js",
+    "seed:catalogo": "node src/scripts/seed-catalogo.js",
+    "seed:all": "node src/scripts/seed-admin.js && node src/scripts/seed-catalogo.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
   },
   "jest": {

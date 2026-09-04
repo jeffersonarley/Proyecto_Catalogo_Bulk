@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { proveedorRepository } from './proveedor.repository.js';
-import { productoRepository } from '../productos/producto.repository.js';
 import AppError from '../../errors/AppError.js';
 
 const slugify = (value = '') => {
@@ -111,23 +110,14 @@ export const updateProveedor = async (id, data = {}) => {
   return proveedorRepository.guardar(proveedor);
 };
 
-export const deleteProveedor = async (id) => {
+export const cambiarEstadoProveedor = async (id, activo) => {
   const proveedor = await proveedorRepository.porIdEditable(id);
   if (!proveedor) {
     throw new AppError('Proveedor no encontrado', 404, 'PROVEEDOR_NO_ENCONTRADO');
   }
 
-  const productosCount = await productoRepository.contarPorProveedor(proveedor._id);
-  if (productosCount > 0) {
-    throw new AppError(
-      'No se puede eliminar el proveedor porque tiene productos asociados',
-      409,
-      'PROVEEDOR_CON_PRODUCTOS'
-    );
-  }
-
-  await proveedorRepository.eliminar(proveedor);
-  return null;
+  proveedor.activo = Boolean(activo);
+  return proveedorRepository.guardar(proveedor);
 };
 
 export default {
@@ -135,5 +125,5 @@ export default {
   getProveedorById,
   listProveedores,
   updateProveedor,
-  deleteProveedor
+  cambiarEstadoProveedor
 };

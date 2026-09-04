@@ -60,6 +60,10 @@ export const listProductos = async (query = {}) => {
     filtros.disponible = query.disponible === 'true' || query.disponible === true;
   }
 
+  if (query.activo !== undefined) {
+    filtros.activo = query.activo === 'true' || query.activo === true;
+  }
+
   if (query.proveedor) {
     const proveedor = await resolverProveedor(query.proveedor);
     if (!proveedor) {
@@ -113,14 +117,14 @@ export const updateProducto = async (id, data = {}) => {
   return productoRepository.guardar(producto);
 };
 
-export const deleteProducto = async (id) => {
+export const cambiarEstadoProducto = async (id, activo) => {
   const producto = await productoRepository.porIdEditable(id);
   if (!producto) {
     throw new AppError('Producto no encontrado', 404, 'PRODUCTO_NO_ENCONTRADO');
   }
 
-  await productoRepository.eliminar(producto);
-  return null;
+  producto.activo = Boolean(activo);
+  return productoRepository.guardar(producto);
 };
 
 export default {
@@ -129,5 +133,5 @@ export default {
   listProductos,
   getProductoStats,
   updateProducto,
-  deleteProducto
+  cambiarEstadoProducto
 };

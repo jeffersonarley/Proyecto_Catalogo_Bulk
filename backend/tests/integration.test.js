@@ -92,10 +92,11 @@ describe('Roles y autorización', () => {
     expect(res.status).toBe(403);
   });
 
-  test('user recibe 403 en DELETE /api/productos/:id', async () => {
+  test('user recibe 403 en PATCH /api/productos/:id/estado', async () => {
     const res = await request(app)
-      .delete(`/api/productos/${new mongoose.Types.ObjectId()}`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .patch(`/api/productos/${new mongoose.Types.ObjectId()}/estado`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ activo: false });
     expect(res.status).toBe(403);
   });
 
@@ -115,10 +116,11 @@ describe('Roles y autorización', () => {
     expect(res.status).toBe(403);
   });
 
-  test('user recibe 403 en DELETE /api/proveedores/:id', async () => {
+  test('user recibe 403 en PATCH /api/proveedores/:id/estado', async () => {
     const res = await request(app)
-      .delete(`/api/proveedores/${new mongoose.Types.ObjectId()}`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .patch(`/api/proveedores/${new mongoose.Types.ObjectId()}/estado`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ activo: false });
     expect(res.status).toBe(403);
   });
 
@@ -174,40 +176,19 @@ describe('Proveedores', () => {
     expect(res.status).toBe(409);
   });
 
-  test('eliminar proveedor con productos asociados → 409', async () => {
+  test('desactivar proveedor (soft delete) → 200 con activo false', async () => {
     const proveedor = await request(app)
       .post('/api/proveedores')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ nombre: 'Proveedor Con Productos', slug: 'prov-con-productos' });
-
-    await request(app)
-      .post('/api/productos')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send({
-        sku: 'SKU-ASOCIADO',
-        nombre: 'Producto asociado',
-        precio: 10,
-        stock: 5,
-        categoria: 'hogar',
-        proveedorId: proveedor.body._id
-      });
+      .send({ nombre: 'Proveedor Soft', slug: 'prov-soft' });
 
     const res = await request(app)
-      .delete(`/api/proveedores/${proveedor.body._id}`)
-      .set('Authorization', `Bearer ${adminToken}`);
-    expect(res.status).toBe(409);
-  });
-
-  test('eliminar proveedor sin productos → 204', async () => {
-    const proveedor = await request(app)
-      .post('/api/proveedores')
+      .patch(`/api/proveedores/${proveedor.body._id}/estado`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ nombre: 'Proveedor Vacio', slug: 'prov-vacio' });
+      .send({ activo: false });
 
-    const res = await request(app)
-      .delete(`/api/proveedores/${proveedor.body._id}`)
-      .set('Authorization', `Bearer ${adminToken}`);
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(res.body.activo).toBe(false);
   });
 });
 
@@ -296,13 +277,13 @@ describe('Productos', () => {
     expect(res.body).toHaveProperty('porCategoria');
   });
 
-  test('eliminar producto → 204', async () => {
+  test('desactivar producto (soft delete) → 200 con activo false', async () => {
     const creado = await request(app)
       .post('/api/productos')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
-        sku: 'SKU-BORRAR',
-        nombre: 'Para borrar',
+        sku: 'SKU-SOFT',
+        nombre: 'Para desactivar',
         precio: 1,
         stock: 1,
         categoria: 'hogar',
@@ -310,9 +291,21 @@ describe('Productos', () => {
       });
 
     const res = await request(app)
-      .delete(`/api/productos/${creado.body._id}`)
+      .patch(`/api/productos/${creado.body._id}/estado`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ activo: false });
+
+    expect(res.status).toBe(200);
+    expect(res.body.activo).toBe(false);
+  });
+
+  test('listar productos filtra por activo=false', async () => {
+    const res = await request(app)
+      .get('/api/productos?activo=false')
       .set('Authorization', `Bearer ${adminToken}`);
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    res.body.data.forEach((p) => expect(p.activo).toBe(false));
   });
 
   test('producto inexistente → 404', async () => {

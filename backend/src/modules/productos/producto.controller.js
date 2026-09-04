@@ -1,6 +1,6 @@
 import {
+  cambiarEstadoProducto,
   createProducto,
-  deleteProducto,
   getProductoById,
   getProductoStats,
   listProductos,
@@ -52,10 +52,10 @@ export const updateProductoController = async (req, res, next) => {
   }
 };
 
-export const deleteProductoController = async (req, res, next) => {
+export const cambiarEstadoProductoController = async (req, res, next) => {
   try {
-    await deleteProducto(req.params.id);
-    return res.status(204).send();
+    const producto = await cambiarEstadoProducto(req.params.id, req.body?.activo);
+    return res.status(200).json(producto);
   } catch (error) {
     return next(error);
   }
@@ -67,5 +67,5 @@ export default {
   getProductosController,
   getProductoStatsController,
   updateProductoController,
-  deleteProductoController
+  cambiarEstadoProductoController
 };

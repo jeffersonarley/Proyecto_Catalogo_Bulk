@@ -25,11 +25,6 @@ export const productoRepository = {
 
   guardar: (doc) => doc.save(),
 
-  eliminar: (doc) => doc.deleteOne(),
-
-  contarPorProveedor: (proveedorId) =>
-    Producto.countDocuments({ proveedorId }),
-
   buscarPorSkus: (skus) =>
     Producto.find({ sku: { $in: skus } }, 'sku').lean(),
 

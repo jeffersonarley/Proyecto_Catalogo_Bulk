@@ -23,9 +23,7 @@ export const proveedorRepository = {
     return { items, total };
   },
 
-  guardar: (doc) => doc.save(),
-
-  eliminar: (doc) => doc.deleteOne()
+  guardar: (doc) => doc.save()
 };
 
 export default proveedorRepository;

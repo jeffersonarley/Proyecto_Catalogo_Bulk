@@ -3,18 +3,18 @@ import { Notify } from "quasar";
 
 import { useAuthStore } from "@/store/Auth";
 
-import Layout from "@/pages/Layout/Layout.vue";
+import Layout from "@/views/Layout/Layout.vue";
 
-import PublicLayout from "@/pages/Public/PublicLayout.vue";
-import CatalogoPublico from "@/pages/Public/CatalogoPublico.vue";
+import PublicLayout from "@/views/Public/PublicLayout.vue";
+import CatalogoPublico from "@/views/Public/CatalogoPublico.vue";
 
-import Login from "@/pages/Login/Login.vue";
-import Catalogo from "@/pages/Catalogo/Catalogo.vue";
-import Productos from "@/pages/Layout/Productos/Productos.vue";
-import Proveedores from "@/pages/Layout/Proveedores/Proveedores.vue";
-import Categorias from "@/pages/Layout/Categorias/Categorias.vue";
-import Usuarios from "@/pages/Layout/Usuarios/Usuarios.vue";
-import NotFound from "@/pages/NotFound/NotFound.vue";
+import Login from "@/views/Login/Login.vue";
+import Catalogo from "@/views/Catalogo/Catalogo.vue";
+import Productos from "@/views/Layout/Productos/Productos.vue";
+import Proveedores from "@/views/Layout/Proveedores/Proveedores.vue";
+import Categorias from "@/views/Layout/Categorias/Categorias.vue";
+import Usuarios from "@/views/Layout/Usuarios/Usuarios.vue";
+import NotFound from "@/views/NotFound/NotFound.vue";
 
 const routes = [
   {
@@ -30,10 +30,10 @@ const routes = [
     ],
   },
   {
-    path: "/login",
+    path: "/loginadmin",
     name: "login",
     component: Login,
-    meta: { titulo: "Login de Administrador", soloInvitados: true },
+    meta: { titulo: "Acceso de administrador", soloInvitados: true },
   },
   {
     path: "/admin",

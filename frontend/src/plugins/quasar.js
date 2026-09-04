@@ -12,8 +12,9 @@ export function instalarQuasar(app) {
     config: {
       notify: {
         position: "top-right",
-        timeout: 3000,
-        actions: [{ icon: "close", color: "white", round: true }],
+        timeout: 3500,
+        classes: "notificacion-bulk",
+        actions: [{ icon: "close", color: "white", round: true, size: "sm" }],
       },
     },
   });

@@ -49,7 +49,7 @@ const iniciarSesion = async () => {
           <img :src="logo" alt="Logo" width="56" height="56" />
           <div class="text-h6 text-weight-bold q-mt-sm">{{ general.titulo }}</div>
           <p class="texto-suave text-body2">
-            Inicia sesión para consultar y gestionar el catálogo.
+            Acceso al panel de administración.
           </p>
         </q-card-section>
 

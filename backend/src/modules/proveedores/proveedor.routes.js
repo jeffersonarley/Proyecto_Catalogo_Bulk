@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import {
+  cambiarEstadoProveedorController,
   createProveedorController,
-  deleteProveedorController,
   getProveedorController,
   getProveedoresController,
   updateProveedorController
@@ -16,6 +16,6 @@ router.get('/:id', getProveedorController);
 // Admin routes
 router.post('/', auth, rol('admin'), createProveedorController);
 router.put('/:id', auth, rol('admin'), updateProveedorController);
-router.delete('/:id', auth, rol('admin'), deleteProveedorController);
+router.patch('/:id/estado', auth, rol('admin'), cambiarEstadoProveedorController);
 
 export default router;

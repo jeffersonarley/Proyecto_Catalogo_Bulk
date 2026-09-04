@@ -1,6 +1,6 @@
 import {
+  cambiarEstadoProveedor,
   createProveedor,
-  deleteProveedor,
   getProveedorById,
   listProveedores,
   updateProveedor
@@ -42,10 +42,10 @@ export const updateProveedorController = async (req, res, next) => {
   }
 };
 
-export const deleteProveedorController = async (req, res, next) => {
+export const cambiarEstadoProveedorController = async (req, res, next) => {
   try {
-    await deleteProveedor(req.params.id);
-    return res.status(204).send();
+    const proveedor = await cambiarEstadoProveedor(req.params.id, req.body?.activo);
+    return res.status(200).json(proveedor);
   } catch (error) {
     return next(error);
   }
@@ -56,5 +56,5 @@ export default {
   getProveedorController,
   getProveedoresController,
   updateProveedorController,
-  deleteProveedorController
+  cambiarEstadoProveedorController
 };

@@ -51,6 +51,7 @@ async function cargarProductos() {
     const params = new URLSearchParams();
     params.set("page", String(page.value));
     params.set("limit", String(limit));
+    params.set("activo", "true");
     if (categoriaActiva.value) params.set("categoria", categoriaActiva.value);
 
     const res = await get(`/productos?${params.toString()}`);

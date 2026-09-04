@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { useGeneralStore } from "@/store/General";
@@ -13,6 +13,19 @@ const auth = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 const { notificarInfo } = useNotificar();
+
+const drawerRef = ref(null);
+
+const cerrarMenuAlClicFuera = (event) => {
+  if (!general.menuAbierto) return;
+  const drawer = drawerRef.value?.$el || drawerRef.value;
+  if (drawer && !drawer.contains(event.target)) {
+    general.menuAbierto = false;
+  }
+};
+
+onMounted(() => document.addEventListener("click", cerrarMenuAlClicFuera));
+onBeforeUnmount(() => document.removeEventListener("click", cerrarMenuAlClicFuera));
 
 const salir = () => {
   auth.cerrarSesion();
@@ -45,7 +58,7 @@ const tituloSeccion = computed(() => route.meta?.titulo || "Panel");
           round
           icon="menu"
           aria-label="Abrir menú"
-          @click="general.alternarMenu()"
+          @click.stop="general.alternarMenu()"
         />
 
         <q-toolbar-title class="text-weight-bold text-subtitle1">
@@ -82,6 +95,7 @@ const tituloSeccion = computed(() => route.meta?.titulo || "Panel");
     </q-header>
 
     <q-drawer
+      ref="drawerRef"
       v-model="general.menuAbierto"
       show-if-above
       bordered

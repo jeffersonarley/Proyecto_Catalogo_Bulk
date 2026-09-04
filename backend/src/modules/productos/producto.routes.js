@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import {
+  cambiarEstadoProductoController,
   createProductoController,
-  deleteProductoController,
   getProductoController,
   getProductosController,
   getProductoStatsController,
@@ -19,6 +19,6 @@ router.get('/:id', getProductoController);
 // Solo admin
 router.post('/', auth, rol('admin'), createProductoController);
 router.put('/:id', auth, rol('admin'), updateProductoController);
-router.delete('/:id', auth, rol('admin'), deleteProductoController);
+router.patch('/:id/estado', auth, rol('admin'), cambiarEstadoProductoController);
 
 export default router;

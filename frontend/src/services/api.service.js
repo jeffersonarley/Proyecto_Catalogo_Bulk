@@ -15,7 +15,7 @@ export const put = async (url, datos = {}) => {
   return data;
 };
 
-export const del = async (url) => {
-  const { data } = await api.delete(url);
+export const patch = async (url, datos = {}) => {
+  const { data } = await api.patch(url, datos);
   return data;
 };
