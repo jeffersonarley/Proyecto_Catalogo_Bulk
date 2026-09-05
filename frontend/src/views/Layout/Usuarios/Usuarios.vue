@@ -222,7 +222,7 @@ const cambiarEstado = async (u) => {
               size="sm"
               class="action-secondary"
               :icon="celda.row.activo ? 'toggle_on' : 'toggle_off'"
-              :color="celda.row.activo ? 'negative' : 'positive'"
+              :color="celda.row.activo ? 'positive' : 'negative'"
               @click="cambiarEstado(celda.row)"
             >
               <q-tooltip>{{ celda.row.activo ? "Desactivar" : "Activar" }}</q-tooltip>

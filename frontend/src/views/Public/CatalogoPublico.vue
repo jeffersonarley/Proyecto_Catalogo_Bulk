@@ -107,31 +107,55 @@ onBeforeUnmount(() => clearTimeout(temporizador));
 </script>
 
 <template>
-  <q-page class="bg-grey-1">
+  <q-page class="catalogo-page">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="contenedor-catalogo">
+        <h1 class="hero-titulo">Catálogo mayorista</h1>
+        <p class="hero-subtitulo">
+          Descubrí los mejores productos para tu negocio, en un solo lugar.
+        </p>
+        <q-input
+          v-model="filtros.busqueda"
+          outlined
+          rounded
+          clearable
+          bg-color="white"
+          class="buscador-hero"
+          placeholder="Buscar por nombre, marca o categoría..."
+          aria-label="Buscar productos"
+        >
+          <template #prepend>
+            <q-icon name="search" color="grey-7" />
+          </template>
+        </q-input>
+      </div>
+    </section>
+
     <div class="contenedor-catalogo">
-      <!-- Barra de filtros -->
-      <div class="barra-filtros row items-center q-col-gutter-sm q-mb-md">
-        <div class="col-12 col-sm-6 col-md-5">
-          <q-input
-            v-model="filtros.busqueda"
-            outlined
-            dense
-            rounded
-            clearable
-            class="buscador"
-            placeholder="Buscar por nombre..."
-          >
-            <template #prepend>
-              <q-icon name="search" />
-            </template>
-          </q-input>
+      <!-- Chips de categoría + orden -->
+      <div class="filtros row items-center q-col-gutter-sm q-mt-lg q-mb-sm">
+        <div class="col-12 col-md-8">
+          <div class="chips-categoria">
+            <q-chip
+              v-for="c in chipsCategoria"
+              :key="c.value"
+              clickable
+              class="chip-cat"
+              :class="{ 'chip-cat--activo': filtros.categoria === c.value }"
+              @click="filtros.categoria = c.value"
+            >
+              {{ c.label }}
+            </q-chip>
+          </div>
         </div>
 
-        <div class="col-12 col-sm-4 col-md-4">
+        <div class="col-12 col-md-4">
           <q-select
             v-model="filtros.orden"
             outlined
             dense
+            rounded
             emit-value
             map-options
             :options="opcionesOrden"
@@ -142,39 +166,26 @@ onBeforeUnmount(() => clearTimeout(temporizador));
             </template>
           </q-select>
         </div>
+      </div>
 
-        <div class="col-12 col-sm-auto col-md-3">
-          <q-btn
-            flat
-            no-caps
-            color="grey-8"
-            icon="filter_alt_off"
-            label="Limpiar filtros"
-            :disable="!hayFiltros"
-            class="full-width"
-            @click="limpiarFiltros"
-          />
+      <!-- Contador + limpiar -->
+      <div class="row items-center justify-between q-mb-md">
+        <div v-if="!cargando" class="contador texto-suave">
+          <q-icon name="inventory_2" size="16px" class="q-mr-xs" />
+          {{ total }} {{ total === 1 ? "resultado" : "resultados" }}
         </div>
-      </div>
+        <div v-else></div>
 
-      <!-- Chips de categoría -->
-      <div class="chips-categoria q-mb-md">
-        <q-chip
-          v-for="c in chipsCategoria"
-          :key="c.value"
-          clickable
-          class="chip-cat"
-          :class="{ 'chip-cat--activo': filtros.categoria === c.value }"
-          @click="filtros.categoria = c.value"
-        >
-          {{ c.label }}
-        </q-chip>
-      </div>
-
-      <!-- Contador de resultados -->
-      <div v-if="!cargando" class="contador texto-suave q-mb-sm">
-        <q-icon name="inventory_2" size="16px" class="q-mr-xs" />
-        {{ total }} {{ total === 1 ? "resultado" : "resultados" }}
+        <q-btn
+          v-if="hayFiltros"
+          flat
+          no-caps
+          dense
+          color="grey-7"
+          icon="filter_alt_off"
+          label="Limpiar filtros"
+          @click="limpiarFiltros"
+        />
       </div>
 
       <!-- Estado: cargando -->
@@ -186,16 +197,7 @@ onBeforeUnmount(() => clearTimeout(temporizador));
       <div v-else-if="productos.length === 0" class="column items-center q-py-xl">
         <q-icon name="search_off" size="72px" color="grey-4" class="q-mb-sm" />
         <span class="empty-title">No se encontraron productos con estos filtros</span>
-        <p class="texto-suave q-mb-md">Prueba con otra búsqueda o categoría.</p>
-        <q-btn
-          v-if="hayFiltros"
-          unelevated
-          no-caps
-          color="primary"
-          icon="filter_alt_off"
-          label="Limpiar filtros"
-          @click="limpiarFiltros"
-        />
+        <p class="texto-suave q-mb-md">Probá con otra búsqueda o categoría.</p>
       </div>
 
       <!-- Grid de productos -->
@@ -222,14 +224,6 @@ onBeforeUnmount(() => clearTimeout(temporizador));
               <div v-if="!p.disponible" class="agotado-overlay">
                 <span>Agotado</span>
               </div>
-
-              <q-badge
-                v-else
-                floating
-                class="q-ma-sm"
-                color="green-7"
-                label="Envío gratis"
-              />
             </div>
 
             <q-card-section class="producto-info">
@@ -270,23 +264,54 @@ onBeforeUnmount(() => clearTimeout(temporizador));
 </template>
 
 <style scoped lang="scss">
+.catalogo-page {
+  background: #f5f6f8;
+}
+
+.hero {
+  background: linear-gradient(135deg, #0f3d1c 0%, #2e7d32 55%, #43a047 100%);
+  color: #fff;
+  padding: 44px 0 52px;
+}
+
+.hero-titulo {
+  font-size: 30px;
+  font-weight: 800;
+  margin: 0 0 6px;
+  letter-spacing: -0.5px;
+}
+
+.hero-subtitulo {
+  font-size: 15px;
+  margin: 0 0 20px;
+  opacity: 0.9;
+}
+
+.buscador-hero {
+  max-width: 560px;
+
+  :deep(.q-field__control) {
+    border-radius: 28px;
+    padding: 4px 8px;
+  }
+
+  :deep(.q-field__control::before) {
+    border: none;
+  }
+}
+
 .contenedor-catalogo {
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 16px 16px 40px;
+  padding: 0 16px 40px;
 }
 
-.buscador {
-  :deep(.q-field__control) {
-    background: #fff;
-    border-radius: 24px;
-  }
+.hero .contenedor-catalogo {
+  padding-bottom: 0;
 }
 
-.contador {
-  font-size: 13px;
-  display: flex;
+.filtros {
   align-items: center;
 }
 
@@ -308,29 +333,52 @@ onBeforeUnmount(() => clearTimeout(temporizador));
   color: #424242;
   border-radius: 20px;
   flex-shrink: 0;
+  transition: all 0.15s ease;
 
   &--activo {
     background: #2e7d32;
     border-color: #2e7d32;
     color: #fff;
+    font-weight: 600;
   }
 }
 
+.contador {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+}
+
+.empty-title {
+  font-weight: 600;
+  color: #424242;
+  margin-bottom: 4px;
+}
+
 .producto-tarjeta {
-  border-radius: 10px;
+  border-radius: 14px;
   border: 1px solid #ececec;
   overflow: hidden;
   background: #fff;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
   }
 }
 
 .producto-media {
   position: relative;
+  overflow: hidden;
+
+  :deep(img) {
+    transition: transform 0.35s ease;
+  }
+}
+
+.producto-tarjeta:hover .producto-media :deep(img) {
+  transform: scale(1.06);
 }
 
 .media-vacia {

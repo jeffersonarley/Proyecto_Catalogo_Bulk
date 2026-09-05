@@ -13,10 +13,6 @@ const irInicio = () => router.push({ name: "inicio" });
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated class="header-publico">
-      <div class="barra-promo text-center">
-        Envíos a todo el país · Catálogo mayorista
-      </div>
-
       <q-toolbar class="bg-white text-dark q-px-sm q-py-xs justify-center">
         <div class="marca row items-center no-wrap cursor-pointer" @click="irInicio">
           <img :src="logo" alt="Logo" width="28" height="28" class="q-mr-xs" />
@@ -40,15 +36,6 @@ const irInicio = () => router.push({ name: "inicio" });
 <style scoped lang="scss">
 .header-publico {
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
-}
-
-.barra-promo {
-  background-color: #2e7d32;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 8px;
-  letter-spacing: 0.3px;
 }
 
 .marca-nombre {
