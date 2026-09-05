@@ -59,7 +59,45 @@ const catalogo = [
   { sku: 'ALIM-006', nombre: 'Aceite de Oliva 500ml', precio: 39900, stock: 80, categoria: 'alimentos', proveedor: 'distribuidora-andina', descripcion: 'Aceite de oliva extra virgen.' }
 ];
 
-const imagen = (sku) => `https://picsum.photos/seed/${sku.toLowerCase()}/400/400`;
+const IMG = '?auto=compress&cs=tinysrgb&w=600';
+const imagenes = {
+  'ELEC-001': `https://images.pexels.com/photos/3394665/pexels-photo-3394665.jpeg${IMG}`,
+  'ELEC-002': `https://images.pexels.com/photos/7915211/pexels-photo-7915211.jpeg${IMG}`,
+  'ELEC-003': `https://images.pexels.com/photos/159394/pexels-photo-159394.jpeg${IMG}`,
+  'ELEC-004': `https://images.pexels.com/photos/42255/pexels-photo-42255.jpeg${IMG}`,
+  'ELEC-005': `https://images.pexels.com/photos/880874/pexels-photo-880874.jpeg${IMG}`,
+  'ELEC-006': `https://images.pexels.com/photos/27904906/pexels-photo-27904906.jpeg${IMG}`,
+  'HOGAR-001': `https://images.pexels.com/photos/3030684/pexels-photo-3030684.jpeg${IMG}`,
+  'HOGAR-002': `https://images.pexels.com/photos/5782042/pexels-photo-5782042.jpeg${IMG}`,
+  'HOGAR-003': `https://images.pexels.com/photos/35386560/pexels-photo-35386560.jpeg${IMG}`,
+  'HOGAR-004': `https://images.pexels.com/photos/823841/pexels-photo-823841.jpeg${IMG}`,
+  'HOGAR-005': `https://images.pexels.com/photos/8580763/pexels-photo-8580763.jpeg${IMG}`,
+  'HOGAR-006': `https://images.pexels.com/photos/3675622/pexels-photo-3675622.jpeg${IMG}`,
+  'ROPA-001': `https://images.pexels.com/photos/8217536/pexels-photo-8217536.jpeg${IMG}`,
+  'ROPA-002': `https://images.pexels.com/photos/4109797/pexels-photo-4109797.jpeg${IMG}`,
+  'ROPA-003': `https://images.pexels.com/photos/9947711/pexels-photo-9947711.jpeg${IMG}`,
+  'ROPA-004': `https://images.pexels.com/photos/20298288/pexels-photo-20298288.jpeg${IMG}`,
+  'ROPA-005': `https://images.pexels.com/photos/6634274/pexels-photo-6634274.jpeg${IMG}`,
+  'ROPA-006': `https://images.pexels.com/photos/9558927/pexels-photo-9558927.jpeg${IMG}`,
+  'DEP-001': `https://images.pexels.com/photos/274506/pexels-photo-274506.jpeg${IMG}`,
+  'DEP-002': `https://images.pexels.com/photos/8032748/pexels-photo-8032748.jpeg${IMG}`,
+  'DEP-003': `https://images.pexels.com/photos/7318664/pexels-photo-7318664.jpeg${IMG}`,
+  'DEP-004': `https://images.pexels.com/photos/5050427/pexels-photo-5050427.jpeg${IMG}`,
+  'DEP-005': `https://images.pexels.com/photos/1342529/pexels-photo-1342529.jpeg${IMG}`,
+  'DEP-006': `https://images.pexels.com/photos/6339679/pexels-photo-6339679.jpeg${IMG}`,
+  'BEL-001': `https://images.pexels.com/photos/32641724/pexels-photo-32641724.jpeg${IMG}`,
+  'BEL-002': `https://images.pexels.com/photos/3993398/pexels-photo-3993398.jpeg${IMG}`,
+  'BEL-003': `https://images.pexels.com/photos/3910068/pexels-photo-3910068.jpeg${IMG}`,
+  'BEL-004': `https://images.pexels.com/photos/3738359/pexels-photo-3738359.jpeg${IMG}`,
+  'BEL-005': `https://images.pexels.com/photos/13794471/pexels-photo-13794471.jpeg${IMG}`,
+  'BEL-006': `https://images.pexels.com/photos/1115128/pexels-photo-1115128.jpeg${IMG}`,
+  'ALIM-001': `https://images.pexels.com/photos/28580602/pexels-photo-28580602.jpeg${IMG}`,
+  'ALIM-002': `https://images.pexels.com/photos/6167333/pexels-photo-6167333.jpeg${IMG}`,
+  'ALIM-003': `https://images.pexels.com/photos/315420/pexels-photo-315420.jpeg${IMG}`,
+  'ALIM-004': `https://images.pexels.com/photos/3872412/pexels-photo-3872412.jpeg${IMG}`,
+  'ALIM-005': `https://images.pexels.com/photos/4390014/pexels-photo-4390014.jpeg${IMG}`,
+  'ALIM-006': `https://images.pexels.com/photos/3737656/pexels-photo-3737656.jpeg${IMG}`
+};
 
 const seedCatalogo = async () => {
   await mongoose.connect(ENV.mongoUri, { serverSelectionTimeoutMS: 5000 });
@@ -97,7 +135,7 @@ const seedCatalogo = async () => {
       stock: item.stock,
       categoria: item.categoria,
       descripcion: item.descripcion,
-      imagenUrl: imagen(item.sku),
+      imagenUrl: imagenes[item.sku] ?? null,
       proveedorId: proveedoresCreados[item.proveedor],
       activo: item.activo ?? true
     });

@@ -212,6 +212,7 @@ onBeforeUnmount(() => clearTimeout(temporizador));
                 :src="p.imagenUrl"
                 :ratio="1"
                 fit="cover"
+                loading="lazy"
                 alt="Imagen del producto"
               />
               <div v-else class="media-vacia full-width">

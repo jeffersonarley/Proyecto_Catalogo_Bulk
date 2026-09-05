@@ -215,6 +215,7 @@ onMounted(() => {
                     v-if="p.imagenUrl"
                     :src="p.imagenUrl"
                     :ratio="4 / 3"
+                    loading="lazy"
                     alt="Imagen del producto"
                   />
                   <div v-else class="producto-imagen__vacio full-width">
