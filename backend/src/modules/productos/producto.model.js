@@ -76,8 +76,19 @@ const productoSchema = new mongoose.Schema({
 });
 
 // Middleware para asegurar que 'disponible' se mantenga actualizado con el stock
-productoSchema.pre('save', async function() {
+productoSchema.pre('save', function() {
   this.disponible = this.stock > 0;
+});
+
+// También al actualizar con findOneAndUpdate / findByIdAndUpdate
+productoSchema.pre('findOneAndUpdate', function() {
+  const update = this.getUpdate();
+
+  if (update.$set && update.$set.stock !== undefined) {
+    update.$set.disponible = update.$set.stock > 0;
+  } else if (update.stock !== undefined) {
+    update.disponible = update.stock > 0;
+  }
 });
 
 const Producto = mongoose.model('Producto', productoSchema, 'productos');
